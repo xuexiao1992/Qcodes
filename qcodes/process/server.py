@@ -291,11 +291,14 @@ class BaseServer(NestedAttrAccess):
         """
         self.running = True
 
-        if config['logging']['usezmq']:
-            if self.timeout == None:
-                self.timeout = 5
-            _ = loggingGUI.installZMQlogger()
-            logging.info('run_event_loop')
+        try:
+            if config['logging']['usezmq']:
+                if self.timeout is None:
+                    self.timeout = 5
+                _ = loggingGUI.installZMQlogger()
+                logging.info('run_event_loop')
+        except:
+            pass                    
         prev_time = time.time()
         while self.running:
             query = self._query_queue.get(timeout=self.timeout)
