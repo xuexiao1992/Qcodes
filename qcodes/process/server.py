@@ -292,7 +292,7 @@ class BaseServer(NestedAttrAccess):
         self.running = True
 
         try:
-            if config['logging']['usezmq']:
+            if config['user']['usezmq']:
                 if self.timeout is None:
                     self.timeout = 5
                 _ = loggingGUI.installZMQlogger()

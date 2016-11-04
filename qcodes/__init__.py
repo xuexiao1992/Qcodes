@@ -17,7 +17,7 @@ from qcodes.process.helpers import set_mp_method
 from qcodes.utils.helpers import in_notebook
 
 try:
-    if config['logging']['usezmq']:
+    if config['user']['usezmq']:
         from qcodes.utils.loggingGUI import installZMQlogger
         qlogger=installZMQlogger()    
 except:
