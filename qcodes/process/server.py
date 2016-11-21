@@ -301,8 +301,15 @@ class BaseServer(NestedAttrAccess):
             pass                    
         prev_time = time.time()
         while self.running:
-            query = self._query_queue.get(timeout=self.timeout)
-            self.process_query(query)
+            try:
+                query = self._query_queue.get(timeout=self.timeout)
+            except mp.queues.Empty as ex:
+                if self.timeout:
+                    query=None
+                else:
+                    raise ex
+            if query is not None:
+                self.process_query(query)
 
             if (time.time() - prev_time) > .1:
                 logging.info('heartbeat of %s: alive... %s' %
