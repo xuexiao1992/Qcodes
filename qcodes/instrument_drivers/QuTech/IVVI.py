@@ -33,7 +33,7 @@ class IVVI(VisaInstrument):
 
     def __init__(self, name, address, reset=False, numdacs=16, dac_step=10,
                  dac_delay=.1, dac_max_delay=0.2, safe_version=True,
-                 use_locks = False, **kwargs):
+                 use_locks=False, **kwargs):
                  # polarity=['BIP', 'BIP', 'BIP', 'BIP']):
                  # commented because still on the todo list
         '''
