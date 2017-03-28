@@ -32,7 +32,8 @@ class IVVI(VisaInstrument):
     Halfrange = Fullrange / 2
 
     def __init__(self, name, address, reset=False, numdacs=16, dac_step=10,
-                 dac_delay=.1, dac_max_delay=0.2, safe_version=True, **kwargs):
+                 dac_delay=.1, dac_max_delay=0.2, safe_version=True,
+                 use_locks = False, **kwargs):
                  # polarity=['BIP', 'BIP', 'BIP', 'BIP']):
                  # commented because still on the todo list
         '''
@@ -54,7 +55,10 @@ class IVVI(VisaInstrument):
         '''
         t0 = time.time()
         super().__init__(name, address, **kwargs)
-        self.lock = threading.Lock()
+        if use_locks:
+            self.lock = threading.Lock()
+        else:
+            self.lock = None
 
         self.safe_version = safe_version
 
@@ -324,18 +328,20 @@ class IVVI(VisaInstrument):
         Raises an error if one occurred
         Returns a list of bytes
         '''
+        if self.lock:
+            max_tries = 10
+            for i in range(max_tries):
+                if self.lock.acquire(timeout=.05):
+                    break
+                else:
+                    logging.warning('IVVI: cannot acquire the lock')
+            if i + 1 == max_tries:
+                raise Exception('IVVI: lock is stuck')
         # Protocol knows about the expected length of the answer
-        max_tries = 10
-        for i in range(max_tries):
-            if self.lock.acquire(timeout=.05):
-                break
-            else:
-                logging.warning('IVVI: cannot acquire the lock')
-        if i + 1 == max_tries:
-            raise('IVVI: lock is stuck')
         message_len = self.write(message, raw=raw)
         reply = self.read(message_len=message_len)
-        self.lock.release()
+        if self.lock:
+            self.lock.release()
 
         return reply
 
