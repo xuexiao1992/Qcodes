@@ -60,7 +60,7 @@ class D5a(Instrument):
             unit='V'
         else:
             unit='a.u.'
-            
+
         for i in range(self._dacoffset, self._numdacs + self._dacoffset):
             self.add_parameter(
                 'dac{}'.format(i),
@@ -68,7 +68,6 @@ class D5a(Instrument):
                 unit=unit,
                 get_cmd=partial(self._get_voltage, i-self._dacoffset),
                 set_cmd=partial(self._set_voltage, i-self._dacoffset),
-                
                 vals=vals.Numbers(-2000, 2000),
                 step=dac_step, 
                 delay=dac_delay, 
@@ -80,6 +79,7 @@ class D5a(Instrument):
 
         if self.verbose:
             print('Initialized %s in %.2fs' % (self.name, t1 - t0))
+
 
     def get_idn(self):
         """
@@ -117,6 +117,7 @@ class D5a(Instrument):
         
         #v=self.D5a.voltages[dacidx]*self.divider
         
+
     def set_dacs_zero(self):
         for i in range(self._numdacs):
             self.set(i + 1, 0)
