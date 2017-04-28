@@ -26,7 +26,7 @@ class D5a(Instrument):
 
     def __init__(self, name, address='COM5', spi_module=1, spi_baud=1000000, spi_timeout=1, reset=False, dac_step=10,
                  dac_delay=.1, dac_max_delay=0.2, divider=1000, safe_version=True,
-                 use_locks=False, **kwargs):
+                 use_locks=True, **kwargs):
         """
         Initialzes the D5a, and communicates with the wrapper
 
@@ -38,11 +38,11 @@ class D5a(Instrument):
             dac_delay (float)        : delay (in seconds) for dac
             dac_max_delay (float)    : maximum delay before emitting a warning
         """
-        
+        self.verbose=1
         self.spi_rack = SPI_rack(address, spi_baud, spi_timeout)
 
         self.D5a = D5a_module(self.spi_rack, spi_module)
-
+        
         t0 = time.time()
         super().__init__(name, **kwargs)
         if use_locks:
@@ -50,27 +50,36 @@ class D5a(Instrument):
         else:
             self.lock = None
 
-        self._numdacs=1
+        self._numdacs=16
         self.divider=divider
         self._dacoffset=1
+        
+        if divider==1000:
+            unit='mV'
+        elif divider==1:
+            unit='V'
+        else:
+            unit='a.u.'
+            
         for i in range(self._dacoffset, self._numdacs + self._dacoffset):
             self.add_parameter(
                 'dac{}'.format(i),
                 label='dac{} '.format(i),
-                unit='mV',
+                unit=unit,
                 get_cmd=partial(self._get_voltage, i-self._dacoffset),
                 set_cmd=partial(self._set_voltage, i-self._dacoffset),
                 
                 vals=vals.Numbers(-2000, 2000),
-                step=dac_step, # FIXME
-                delay=dac_delay, # FIXME
-                max_delay=dac_max_delay, # FIXME
-                max_val_age=10 # FIXME
+                step=dac_step, 
+                delay=dac_delay, 
+                max_delay=dac_max_delay, 
+                max_val_age=10 
                 )
 
         t1 = time.time()
 
-        print('Initialized %s in %.2fs' % (self.name, t1 - t0))
+        if self.verbose:
+            print('Initialized %s in %.2fs' % (self.name, t1 - t0))
 
     def get_idn(self):
         """
@@ -91,13 +100,23 @@ class D5a(Instrument):
     
     def _set_voltage(self, dacidx, value):
         #print('_get_voltage: idx %d, value %f' % (dacidx, v))
-        self.D5a.set_voltage(dacidx, value/self.divider)
-
+        if self.lock:
+            with self.lock:
+                self.D5a.set_voltage(dacidx, value/self.divider)
+        else:
+            self.D5a.set_voltage(dacidx, value/self.divider)
     def _get_voltage(self, dacidx):
-        v=self.D5a.voltages[dacidx]*self.divider
-        #print('_get_voltage: idx %d, value %f' % (dacidx, v))
-        return v
-
+        if self.lock:
+            with self.lock:
+                [voltage, span] = self.D5a.get_settings(dacidx)
+        else:
+            [voltage, span] = self.D5a.get_settings(dacidx)
+        if self.verbose>=2:
+            print('_get_voltage: idx %d, value %f %f' % (dacidx, voltage, span))
+        return voltage*self.divider
+        
+        #v=self.D5a.voltages[dacidx]*self.divider
+        
     def set_dacs_zero(self):
         for i in range(self._numdacs):
             self.set(i + 1, 0)
