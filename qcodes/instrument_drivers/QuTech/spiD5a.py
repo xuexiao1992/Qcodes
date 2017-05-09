@@ -12,10 +12,10 @@ from qcodes.utils.validators import Bool, Numbers
 
 import sys
 
-sys.path.append(r'D:\users\2x2\SPI-rack')
+sys.path.append(r'D:\drivers\SPI-rack\spirack')
 
 from spi_rack import SPI_rack
-from D5a.D5a_module import D5a_module
+from D5a_module import D5a_module
 
 #%%
 
@@ -40,6 +40,7 @@ class D5a(Instrument):
         """
         self.verbose=1
         self.spi_rack = SPI_rack(address, spi_baud, spi_timeout)
+        self.spi_rack.unlock()
 
         self.D5a = D5a_module(self.spi_rack, spi_module)
         
@@ -115,7 +116,8 @@ class D5a(Instrument):
             print('_get_voltage: idx %d, value %f %f' % (dacidx, voltage, span))
         return voltage*self.divider
         
-        #v=self.D5a.voltages[dacidx]*self.divider
+#        v=self.D5a.voltages[dacidx]*self.divider
+#        return v
         
 
     def set_dacs_zero(self):
