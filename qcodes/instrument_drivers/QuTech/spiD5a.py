@@ -42,7 +42,7 @@ class D5a(Instrument):
         self.spi_rack = SPI_rack(address, spi_baud, spi_timeout)
         self.spi_rack.unlock()
 
-        self.D5a = D5a_module(self.spi_rack, spi_module)
+        self.D5a = D5a_module(self.spi_rack, spi_module, reset_voltages=reset)
         
         t0 = time.time()
         super().__init__(name, **kwargs)
