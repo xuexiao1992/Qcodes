@@ -757,14 +757,28 @@ class OxfordInstruments_IPS120(VisaInstrument):
         and switch on heater
         """
         if self.switch_heater() == 2:
-            current_in_magnet = self.persistent_current()
-            current_in_leads = self.current()
+#            current_in_magnet = self.persistent_current()
+#            current_in_leads = self.current()
+#            self.hold()
+#            self.current_setpoint(current_in_magnet)
+#            self.to_setpoint()
+
+#            while current_in_leads != current_in_magnet:
+#                current_in_leads = self.current()
+            persistent_field = self.persistent_field()
+            field = self.field()
             self.hold()
-            self.current_setpoint(current_in_magnet)
+            self.field_setpoint(persistent_field)
             self.to_setpoint()
 
-            while current_in_leads != current_in_magnet:
-                current_in_leads = self.current()
+            sleeps = 0
+            while field != persistent_field:
+                sleep(.1)
+                field = self.field()
+                sleeps += 1
+                if sleeps > 10:
+                    raise Exception('Magnet can not match field with persistent field.')
+
             self.heater_on()
             self.hold()
 
