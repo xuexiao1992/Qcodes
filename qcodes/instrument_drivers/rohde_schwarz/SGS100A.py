@@ -71,11 +71,11 @@ class RohdeSchwarz_SGS100A(VisaInstrument):
                            set_cmd='SOUR:ROSC:SOUR {}',
                            vals=vals.Enum('INT', 'EXT'))
         # Frequency mw_source outputs when used as a reference
-        self.add_parameter('ref_osc_output_freq',
-                           label='Reference oscillator output frequency',
-                           get_cmd='SOUR:ROSC:OUTP:FREQ?',
-                           set_cmd='SOUR:ROSC:OUTP:FREQ {}',
-                           vals=vals.Enum('10MHz', '100MHz', '1000MHz'))
+#        self.add_parameter('ref_osc_output_freq',
+#                           label='Reference oscillator output frequency',
+#                           get_cmd='SOUR:ROSC:OUTP:FREQ?',
+#                           set_cmd='SOUR:ROSC:OUTP:FREQ {}',
+#                           vals=vals.Enum('10MHz', '100MHz', '1000MHz'))
         # Frequency of the external reference mw_source uses
         self.add_parameter('ref_osc_external_freq',
                            label='Reference oscillator external frequency',
